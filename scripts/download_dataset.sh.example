@@ -1,0 +1,84 @@
+#!/bin/bash
+# =============================================================================
+# Download BIDS Dataset from OpenNeuro
+# =============================================================================
+#
+# This is an EXAMPLE script. Copy and customize for your specific dataset.
+#
+# Prerequisites:
+#   - AWS CLI installed: https://aws.amazon.com/cli/
+#   - No AWS credentials needed (OpenNeuro is public, uses --no-sign-request)
+#
+# Usage:
+#   1. Copy this file: cp download_dataset.sh.example download_mydataset.sh
+#   2. Update DATASET_ID and OUTPUT_DIR below
+#   3. Make executable: chmod +x download_mydataset.sh
+#   4. Run: ./download_mydataset.sh
+#
+# =============================================================================
+
+set -euo pipefail
+
+# -----------------------------------------------------------------------------
+# TODO: Configure these variables for your dataset
+# -----------------------------------------------------------------------------
+
+# OpenNeuro dataset ID (e.g., ds004884 for ARC, ds004889 for SOOP)
+DATASET_ID="ds00XXXX"  # TODO: Replace with your dataset ID
+
+# Local output directory
+OUTPUT_DIR="./data/openneuro/${DATASET_ID}"
+
+# Optional: specific version tag (leave empty for latest)
+# VERSION="1.0.0"
+VERSION=""
+
+# -----------------------------------------------------------------------------
+# Download logic
+# -----------------------------------------------------------------------------
+
+echo "=========================================="
+echo "Downloading OpenNeuro dataset: ${DATASET_ID}"
+echo "Output directory: ${OUTPUT_DIR}"
+echo "=========================================="
+
+# Create output directory
+mkdir -p "${OUTPUT_DIR}"
+
+# Construct S3 path
+if [[ -n "${VERSION}" ]]; then
+    S3_PATH="s3://openneuro.org/${DATASET_ID}/${VERSION}"
+    echo "Version: ${VERSION}"
+else
+    S3_PATH="s3://openneuro.org/${DATASET_ID}"
+    echo "Version: latest"
+fi
+
+echo ""
+echo "Syncing from: ${S3_PATH}"
+echo "This may take a while for large datasets..."
+echo ""
+
+# Download using AWS CLI (no credentials needed for public data)
+aws s3 sync \
+    --no-sign-request \
+    "${S3_PATH}" \
+    "${OUTPUT_DIR}"
+
+echo ""
+echo "=========================================="
+echo "Download complete!"
+echo "Dataset location: ${OUTPUT_DIR}"
+echo "=========================================="
+
+# Verify BIDS structure
+if [[ -f "${OUTPUT_DIR}/dataset_description.json" ]]; then
+    echo ""
+    echo "BIDS dataset_description.json found. Dataset appears valid."
+    echo ""
+    cat "${OUTPUT_DIR}/dataset_description.json"
+else
+    echo ""
+    echo "WARNING: dataset_description.json not found."
+    echo "This may not be a valid BIDS dataset or download may be incomplete."
+fi

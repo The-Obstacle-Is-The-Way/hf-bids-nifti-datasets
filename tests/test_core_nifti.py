@@ -6,6 +6,7 @@ without requiring real NIfTI files or BIDS datasets.
 """
 
 import tempfile
+from collections.abc import Generator
 from pathlib import Path
 
 import nibabel as nib
@@ -17,6 +18,7 @@ from datasets import Dataset, Features, Nifti, Value
 from hf_bids_nifti.core import (
     DatasetBuilderConfig,
     build_hf_dataset,
+    push_dataset_to_hub,
     validate_file_table_columns,
 )
 
@@ -44,7 +46,7 @@ def simple_features() -> Features:
 
 
 @pytest.fixture
-def temp_nifti_dir():
+def temp_nifti_dir() -> Generator[Path, None, None]:
     """Create a temporary directory with fake NIfTI files."""
     with tempfile.TemporaryDirectory() as tmpdir:
         tmppath = Path(tmpdir)
@@ -283,3 +285,57 @@ class TestDatasetBuilderConfig:
 
         assert config.split == "train"
         assert config.dry_run is True
+
+
+class TestPushDatasetToHub:
+    """Tests for push_dataset_to_hub function."""
+
+    def test_embed_external_files_defaults_to_false(
+        self,
+        dummy_config: DatasetBuilderConfig,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Test that embed_external_files defaults to False (not HF's True default).
+
+        This is critical for NIfTI datasets to avoid TB-scale Parquet files.
+        """
+        ds = Dataset.from_dict({"id": ["a", "b"]})
+
+        # Mock push_to_hub to avoid actual network calls and capture args
+        push_called_with: dict[str, object] = {}
+
+        def mock_push_to_hub(
+            repo_id: str, embed_external_files: bool = True, **kwargs: object
+        ) -> None:
+            push_called_with["repo_id"] = repo_id
+            push_called_with["embed_external_files"] = embed_external_files
+
+        monkeypatch.setattr(ds, "push_to_hub", mock_push_to_hub)
+
+        # Call without specifying embed_external_files
+        push_dataset_to_hub(ds, dummy_config)
+
+        # Should default to False (our safe default), not True (HF default)
+        assert push_called_with["embed_external_files"] is False
+
+    def test_embed_external_files_can_be_set_true(
+        self,
+        dummy_config: DatasetBuilderConfig,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Test that embed_external_files can be explicitly set to True if needed."""
+        ds = Dataset.from_dict({"id": ["a", "b"]})
+
+        push_called_with: dict[str, object] = {}
+
+        def mock_push_to_hub(
+            repo_id: str, embed_external_files: bool = True, **kwargs: object
+        ) -> None:
+            push_called_with["embed_external_files"] = embed_external_files
+
+        monkeypatch.setattr(ds, "push_to_hub", mock_push_to_hub)
+
+        # Explicitly set to True
+        push_dataset_to_hub(ds, dummy_config, embed_external_files=True)
+
+        assert push_called_with["embed_external_files"] is True
