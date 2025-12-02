@@ -190,7 +190,7 @@ def spot_check_nifti_files(
         for f in sample:
             # Load header only (fast, catches most corruption)
             _ = nib.load(f).header
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - intentionally broad to catch any IO/nibabel error
         return ValidationCheck(
             name="nifti_integrity",
             passed=False,
@@ -210,7 +210,7 @@ def spot_check_nifti_files(
 
 def count_subjects(bids_root: Path) -> int:
     """Count subject directories in a BIDS dataset."""
-    return len(list(bids_root.glob("sub-*")))
+    return sum(1 for p in bids_root.glob("sub-*") if p.is_dir())
 
 
 def count_files(bids_root: Path, pattern: str) -> int:

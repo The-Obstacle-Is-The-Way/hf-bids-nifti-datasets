@@ -75,7 +75,7 @@ hf-bids-nifti-datasets/
 
 The `data/` directory (gitignored) is where you store downloaded BIDS datasets:
 
-```
+```text
 data/
 └── openneuro/
     └── ds00XXXX/              # BIDS dataset ID
@@ -298,4 +298,4 @@ Apache-2.0 (this software)
 **Source Data License:** The datasets available on OpenNeuro (e.g., ARC ds004884, SOOP ds004889) are released under **CC0 1.0 (Public Domain)**. This means:
 - You can freely copy, modify, and redistribute the data
 - No permission or attribution is legally required (though citation is encouraged)
-- See: https://creativecommons.org/publicdomain/zero/1.0/
+- See: <https://creativecommons.org/publicdomain/zero/1.0/>
