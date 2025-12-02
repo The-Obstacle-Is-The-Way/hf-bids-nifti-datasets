@@ -51,15 +51,15 @@ from .core import DatasetBuilderConfig, build_hf_dataset, push_dataset_to_hub
 __version__ = "0.1.0"
 
 __all__ = [
-    # Core
+    # Version
+    "__version__",
+    # Config (alphabetical)
+    "ARC_CONFIG",
+    "BidsDatasetConfig",
+    "DATASET_REGISTRY",
+    "SOOP_CONFIG",
+    # Core (alphabetical)
     "DatasetBuilderConfig",
     "build_hf_dataset",
     "push_dataset_to_hub",
-    # Config
-    "BidsDatasetConfig",
-    "ARC_CONFIG",
-    "SOOP_CONFIG",
-    "DATASET_REGISTRY",
-    # Version
-    "__version__",
 ]

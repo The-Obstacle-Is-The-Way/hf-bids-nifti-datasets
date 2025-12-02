@@ -91,7 +91,7 @@ def validate_file_table_columns(
 
 
 def build_hf_dataset(
-    config: DatasetBuilderConfig,
+    config: DatasetBuilderConfig,  # noqa: ARG001 - reserved for future path resolution
     file_table: pd.DataFrame,
     features: Features,
 ) -> Dataset:
@@ -103,6 +103,8 @@ def build_hf_dataset(
 
     Args:
         config: Configuration containing BIDS root path and HF repo info.
+            Currently used for API consistency; will be used in future versions
+            for resolving relative file paths against bids_root.
         file_table: DataFrame with one row per "example" containing:
             - One or more columns with NIfTI file paths (as strings)
             - Scalar metadata columns (subject_id, age, etc.)

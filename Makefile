@@ -1,7 +1,8 @@
-.PHONY: help install lint format typecheck test test-cov clean pre-commit
+.PHONY: help install lint format typecheck test test-cov clean pre-commit all
 
 help:
 	@echo "Available targets:"
+	@echo "  all         - Run lint, typecheck, and test"
 	@echo "  install     - Install dependencies with uv"
 	@echo "  lint        - Run ruff linter"
 	@echo "  format      - Format code with ruff"
@@ -10,6 +11,8 @@ help:
 	@echo "  test-cov    - Run pytest with coverage"
 	@echo "  pre-commit  - Run pre-commit on all files"
 	@echo "  clean       - Remove build artifacts"
+
+all: lint typecheck test
 
 install:
 	uv sync
