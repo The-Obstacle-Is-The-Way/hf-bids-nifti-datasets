@@ -23,8 +23,18 @@ class TestCliHelp:
 
         assert result.exit_code == 0
         assert "BIDS" in result.stdout or "bids" in result.stdout.lower()
+        assert "validate" in result.stdout
         assert "arc" in result.stdout
         assert "soop" in result.stdout
+
+    def test_validate_help(self) -> None:
+        """Test that validate --help works."""
+        result = runner.invoke(app, ["validate", "--help"])
+
+        assert result.exit_code == 0
+        assert "validate" in result.stdout.lower() or "BIDS" in result.stdout
+        assert "--pattern" in result.stdout
+        assert "--sample-size" in result.stdout
 
     def test_arc_help(self) -> None:
         """Test that arc --help works."""

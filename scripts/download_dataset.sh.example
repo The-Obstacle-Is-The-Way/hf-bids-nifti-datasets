@@ -34,6 +34,24 @@ OUTPUT_DIR="./data/openneuro/${DATASET_ID}"
 VERSION=""
 
 # -----------------------------------------------------------------------------
+# Pre-flight checks
+# -----------------------------------------------------------------------------
+
+# Guard against running with placeholder DATASET_ID
+if [[ "${DATASET_ID}" == "ds00XXXX" ]]; then
+    echo "ERROR: Please set DATASET_ID to a real OpenNeuro dataset ID before running." >&2
+    echo "       Edit this script and replace 'ds00XXXX' with your dataset ID." >&2
+    exit 1
+fi
+
+# Check that AWS CLI is installed
+if ! command -v aws >/dev/null 2>&1; then
+    echo "ERROR: aws CLI not found. Please install it first:" >&2
+    echo "       https://aws.amazon.com/cli/" >&2
+    exit 1
+fi
+
+# -----------------------------------------------------------------------------
 # Download logic
 # -----------------------------------------------------------------------------
 
@@ -74,7 +92,10 @@ echo "=========================================="
 # Verify BIDS structure
 if [[ -f "${OUTPUT_DIR}/dataset_description.json" ]]; then
     echo ""
-    echo "BIDS dataset_description.json found. Dataset appears valid."
+    echo "BIDS dataset_description.json found (basic check passed)."
+    echo ""
+    echo "For full validation before pushing to HuggingFace, run:"
+    echo "  hf-bids-nifti validate \"${OUTPUT_DIR}\""
     echo ""
     cat "${OUTPUT_DIR}/dataset_description.json"
 else

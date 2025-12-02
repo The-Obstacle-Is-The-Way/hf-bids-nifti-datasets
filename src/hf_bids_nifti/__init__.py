@@ -40,6 +40,7 @@ Example:
 Modules:
     core: Generic BIDS → HF Dataset conversion utilities
     config: Dataset configuration structures
+    validation: Data integrity validation utilities
     arc: ARC dataset (ds004884) specific code (STUB)
     soop: SOOP dataset (ds004889) specific code (STUB)
     cli: Typer-based command-line interface
@@ -47,6 +48,16 @@ Modules:
 
 from .config import ARC_CONFIG, DATASET_REGISTRY, SOOP_CONFIG, BidsDatasetConfig
 from .core import DatasetBuilderConfig, build_hf_dataset, push_dataset_to_hub
+from .validation import (
+    ValidationCheck,
+    ValidationResult,
+    count_files,
+    count_subjects,
+    spot_check_nifti_files,
+    validate_bids_required_files,
+    validate_count,
+    validate_generic_bids,
+)
 
 __version__ = "0.1.0"
 
@@ -62,6 +73,15 @@ __all__ = [
     "DatasetBuilderConfig",
     "build_hf_dataset",
     "push_dataset_to_hub",
+    # Validation (alphabetical)
+    "ValidationCheck",
+    "ValidationResult",
+    "count_files",
+    "count_subjects",
+    "spot_check_nifti_files",
+    "validate_bids_required_files",
+    "validate_count",
+    "validate_generic_bids",
     # TODO: When implementing your dataset, export your functions here:
     # "build_mydataset_file_table",
     # "get_mydataset_features",
