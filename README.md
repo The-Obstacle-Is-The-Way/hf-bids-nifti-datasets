@@ -2,6 +2,8 @@
 
 Template for converting BIDS neuroimaging datasets (e.g., ARC, SOOP) into Hugging Face Datasets with NIfTI + tabular features.
 
+> ⚠️ **CRITICAL DEPENDENCY WARNING**: This template requires installing `datasets` from GitHub (not PyPI). See [Critical Dependency Requirement](#critical-dependency-requirement-huggingface-datasets) below.
+
 ## Overview
 
 This repository provides a **reusable template** for:
@@ -42,6 +44,62 @@ uv run hf-bids-nifti --help
 ```
 
 > **Note:** ARC and SOOP commands are templates that will raise `NotImplementedError` until their file-table builders are implemented.
+
+## Critical Dependency Requirement: HuggingFace Datasets
+
+### The Problem
+
+The stable release of `datasets` (PyPI versions 3.x, 4.x including 4.4.1) has a **critical bug** where NIfTI files are uploaded as **empty bytes (0 bytes)** to HuggingFace Hub. This happens because `Nifti.embed_storage` was broken in stable releases.
+
+- **Silent failure**: `push_to_hub(embed_external_files=True)` uploads 0-byte files
+- **No error raised**: Your dataset appears to have data but all NIfTI files are empty
+- **Only visible when loading**: `load_dataset()` returns empty/corrupted images
+
+See [huggingface/datasets#7815](https://github.com/huggingface/datasets/pull/7815) for the original Nifti support PR and subsequent bug reports.
+
+### The Fix
+
+Install `datasets` from the GitHub main branch (dev version 4.4.2.dev0 or later). This template is pre-configured to do this via `[tool.uv.sources]` in `pyproject.toml`.
+
+### Verification
+
+After installation, verify the version:
+
+```python
+import datasets
+print(datasets.__version__)  # Should show "4.4.2.dev0" or similar dev version
+```
+
+### Manual Installation (if not using this template)
+
+**For uv (pyproject.toml):**
+
+```toml
+[project]
+dependencies = [
+    "datasets>=4.4.0",  # Minimum version for Nifti support
+    "huggingface-hub>=0.32.0",  # Required for XET storage
+    # ... other deps
+]
+
+[tool.uv.sources]
+# CRITICAL: Override datasets to use git version for Nifti.embed_storage fix
+datasets = { git = "https://github.com/huggingface/datasets.git" }
+```
+
+**For pip/requirements.txt:**
+
+```text
+datasets @ git+https://github.com/huggingface/datasets.git
+```
+
+**Direct uv command:**
+
+```bash
+uv add "datasets @ git+https://github.com/huggingface/datasets.git"
+```
+
+> **Note**: This requirement will change once the fix is merged into a stable release. Check [HuggingFace datasets releases](https://github.com/huggingface/datasets/releases) for updates.
 
 ## Project Structure
 

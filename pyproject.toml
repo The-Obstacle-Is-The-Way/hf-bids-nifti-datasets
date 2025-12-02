@@ -22,12 +22,21 @@ classifiers = [
 ]
 
 dependencies = [
-    "datasets>=3.4.0",
+    "datasets>=4.4.0",  # Minimum version with Nifti support (see [tool.uv.sources] for critical override)
+    "huggingface-hub>=0.32.0",  # Required for XET storage support
     "nibabel>=5.0.0",
     "pandas>=2.0.0",
     "typer>=0.12.0",
     "pydantic>=2.0.0",
 ]
+
+# CRITICAL: Override datasets to use git version for Nifti.embed_storage fix
+# The stable release (4.4.x) has a bug where NIfTI files are uploaded as empty bytes (0 bytes)
+# to HuggingFace Hub because Nifti.embed_storage was broken. The fix is in the dev branch only.
+# See: https://github.com/huggingface/datasets/pull/7815 (original Nifti support)
+# This requirement will change once the fix is merged into a stable release.
+[tool.uv.sources]
+datasets = { git = "https://github.com/huggingface/datasets.git" }
 
 [project.optional-dependencies]
 dev = [
