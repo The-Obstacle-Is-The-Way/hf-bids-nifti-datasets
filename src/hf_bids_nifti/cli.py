@@ -2,12 +2,16 @@
 Command-line interface for BIDS → Hugging Face NIfTI dataset tools.
 
 This CLI provides subcommands for processing specific BIDS datasets:
+- `validate`: Validate a BIDS dataset download (generic checks)
 - `arc`: Process the ARC dataset (ds004884)
 - `soop`: Process the SOOP dataset (ds004889)
 
 Usage:
     # Show help
     hf-bids-nifti --help
+
+    # Validate a BIDS dataset download
+    hf-bids-nifti validate /path/to/bids-dataset
 
     # Process ARC dataset (dry run - won't push to Hub)
     hf-bids-nifti arc /path/to/ds004884 --hf-repo user/arc-dataset --dry-run
@@ -26,12 +30,58 @@ import typer
 from .arc import build_and_push_arc
 from .core import DatasetBuilderConfig
 from .soop import build_and_push_soop
+from .validation import validate_generic_bids
 
 app = typer.Typer(
     name="hf-bids-nifti",
     help="BIDS → Hugging Face NIfTI dataset tools.",
     add_completion=False,
 )
+
+
+@app.command()
+def validate(
+    bids_root: Path = typer.Argument(
+        ...,
+        help="Path to BIDS dataset root directory.",
+    ),
+    nifti_pattern: str = typer.Option(
+        "**/*_T1w.nii.gz",
+        "--pattern",
+        "-p",
+        help="Glob pattern for NIfTI files to spot-check.",
+    ),
+    sample_size: int = typer.Option(
+        10,
+        "--sample-size",
+        "-n",
+        help="Number of NIfTI files to spot-check for integrity.",
+    ),
+) -> None:
+    """
+    Validate a BIDS dataset download before pushing to HuggingFace.
+
+    This runs generic validation checks applicable to any BIDS dataset:
+    - Required BIDS files exist (dataset_description.json, participants.tsv)
+    - Sample NIfTI files are loadable with nibabel
+
+    For dataset-specific validation (subject counts, series counts),
+    implement a custom validate command in your dataset module.
+
+    Example:
+        hf-bids-nifti validate /path/to/bids-dataset
+        hf-bids-nifti validate /data/ds004884 --pattern "**/*_T1w.nii.gz" -n 20
+    """
+    result = validate_generic_bids(
+        bids_root,
+        nifti_pattern=nifti_pattern,
+        nifti_sample_size=sample_size,
+    )
+
+    typer.echo(result.summary())
+
+    if not result.all_passed:
+        raise typer.Exit(code=1)
 
 
 @app.command()

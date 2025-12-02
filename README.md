@@ -52,11 +52,13 @@ hf-bids-nifti-datasets/
 │       ├── __init__.py      # Package exports
 │       ├── core.py          # Generic BIDS→HF Dataset logic
 │       ├── config.py        # Dataset configuration objects
+│       ├── validation.py    # Data integrity validation utilities
 │       ├── arc.py           # ARC-specific STUB
 │       ├── soop.py          # SOOP-specific STUB
 │       └── cli.py           # Typer CLI
 ├── tests/
 │   ├── test_core_nifti.py   # Core functionality tests
+│   ├── test_validation.py   # Validation module tests
 │   └── test_cli_skeleton.py # CLI tests
 ├── scripts/
 │   └── download_dataset.sh.example  # Example download script
@@ -86,6 +88,48 @@ data/
 ```
 
 Use `scripts/download_dataset.sh.example` as a template for downloading from OpenNeuro.
+
+### Validating Downloads
+
+OpenNeuro datasets are DataLad/git-annex repos with internal checksums, but raw AWS S3 downloads bypass this integrity layer. Always validate before pushing to HuggingFace:
+
+```bash
+# Generic validation (works with any BIDS dataset)
+uv run hf-bids-nifti validate /path/to/bids-dataset
+
+# Customize the NIfTI pattern and sample size
+uv run hf-bids-nifti validate /path/to/bids-dataset --pattern "**/*_T2w.nii.gz" -n 20
+```
+
+This checks:
+
+- Required BIDS files exist (dataset_description.json, participants.tsv)
+- Sample NIfTI files are loadable with nibabel
+
+For dataset-specific validation (subject counts, series counts), implement a custom validation function using the validation utilities:
+
+```python
+from hf_bids_nifti.validation import (
+    ValidationResult,
+    validate_bids_required_files,
+    spot_check_nifti_files,
+    count_subjects,
+    validate_count,
+)
+
+def validate_my_dataset(bids_root: Path) -> ValidationResult:
+    result = ValidationResult(bids_root)
+
+    # Generic checks
+    result.add_check(validate_bids_required_files(bids_root))
+    result.add_check(spot_check_nifti_files(bids_root))
+
+    # Dataset-specific checks
+    n_subjects = count_subjects(bids_root)
+    result.add_check(validate_count("subjects", n_subjects, expected_min=100))
+
+    return result
+```
 
 ## Usage
 
@@ -125,15 +169,20 @@ img = ds[0]["t1w"]  # Returns nibabel.Nifti1Image
 data = img.get_fdata()  # Convert to numpy array
 ```
 
-### CLI (Templates)
+### CLI
 
 ```bash
+# Validate a downloaded BIDS dataset
+uv run hf-bids-nifti validate /path/to/bids-dataset
+
 # ARC dataset (template - will raise NotImplementedError)
 uv run hf-bids-nifti arc /path/to/ds004884 --hf-repo user/arc-demo --dry-run
 
 # SOOP dataset (template - will raise NotImplementedError)
 uv run hf-bids-nifti soop /path/to/ds004889 --hf-repo user/soop-demo --dry-run
 ```
+
+> **Note:** ARC and SOOP commands are templates that raise `NotImplementedError` until implemented.
 
 ## Development
 
@@ -190,6 +239,8 @@ make pre-commit
 - **`DatasetBuilderConfig`**: Configuration dataclass holding BIDS root path, HF repo ID, and options
 - **`build_hf_dataset()`**: Generic function that converts a pandas DataFrame with NIfTI paths to an HF Dataset
 - **`Features` with `Nifti()`**: HF schema that enables automatic NIfTI loading via nibabel
+- **`ValidationResult`**: Aggregates validation checks with pass/fail status and human-readable summary
+- **`push_dataset_to_hub()`**: Safe push wrapper defaulting `embed_external_files=False` to avoid TB-scale Parquet bloat
 
 ### Workflow
 
