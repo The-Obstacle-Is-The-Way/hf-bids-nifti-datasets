@@ -1,0 +1,64 @@
+# CITATION.cff - Citation File Format for this software
+# See: https://citation-file-format.github.io/
+#
+# TODO: Update all fields marked with TODO before publishing your dataset.
+# This file enables proper citation of your work via GitHub's "Cite this repository" feature.
+
+cff-version: 1.2.0
+message: "If you use this software/dataset, please cite it as below."
+
+# TODO: Update title to your dataset name
+title: "hf-bids-nifti-datasets"
+
+# TODO: Update version when you release
+version: "0.1.0"
+
+# TODO: Update release date
+date-released: "2024-01-01"
+
+# TODO: Add all authors
+authors:
+  - family-names: "TODO-LastName"
+    given-names: "TODO-FirstName"
+    orcid: "https://orcid.org/0000-0000-0000-0000"  # TODO: Add your ORCID
+    affiliation: "TODO-Institution"
+
+# Repository URLs
+repository-code: "https://github.com/The-Obstacle-Is-The-Way/hf-bids-nifti-datasets"
+url: "https://github.com/The-Obstacle-Is-The-Way/hf-bids-nifti-datasets"
+
+# License
+license: "Apache-2.0"
+
+# Keywords for discoverability
+keywords:
+  - neuroimaging
+  - BIDS
+  - NIfTI
+  - Hugging Face
+  - datasets
+  - MRI
+
+# TODO: Add DOI when available (e.g., from Zenodo)
+# doi: "10.5281/zenodo.XXXXXXX"
+
+# TODO: If this is a dataset derived from a published paper, add preferred-citation
+# preferred-citation:
+#   type: article
+#   authors:
+#     - family-names: "Author"
+#       given-names: "First"
+#   title: "Paper Title"
+#   journal: "Journal Name"
+#   year: 2024
+#   doi: "10.xxxx/xxxxx"
+
+# TODO: If using data from OpenNeuro, add as reference
+# references:
+#   - type: dataset
+#     authors:
+#       - family-names: "Original"
+#         given-names: "Author"
+#     title: "Original Dataset Name"
+#     repository: "https://openneuro.org/datasets/dsXXXXXX"
+#     license: "CC0-1.0"

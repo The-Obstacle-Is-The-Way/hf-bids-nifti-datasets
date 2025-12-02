@@ -156,6 +156,7 @@ def build_hf_dataset(
 def push_dataset_to_hub(
     ds: Dataset,
     config: DatasetBuilderConfig,
+    embed_external_files: bool = False,
     **push_kwargs: Any,
 ) -> None:
     """
@@ -164,14 +165,31 @@ def push_dataset_to_hub(
     Assumes the user has already authenticated via `huggingface-cli login`
     or has set the HF_TOKEN environment variable.
 
+    IMPORTANT: This function defaults embed_external_files=False, which differs
+    from HuggingFace's default (True). For NIfTI datasets, embedding files into
+    Parquet causes MASSIVE bloat (TB-scale for typical neuroimaging datasets).
+    Only set embed_external_files=True if you specifically need self-contained
+    Parquet files and understand the storage implications.
+
     Args:
         ds: The Hugging Face Dataset to push.
         config: Configuration containing the target repo ID.
+        embed_external_files: Whether to embed external files (e.g., NIfTI) into
+            Parquet. Defaults to False to avoid TB-scale storage bloat.
+            When False, files are uploaded separately and referenced by path.
         **push_kwargs: Additional keyword arguments passed to `ds.push_to_hub()`.
 
     Example:
         ```python
+        # Default: files stored separately (recommended for NIfTI)
         push_dataset_to_hub(ds, config, private=True)
+
+        # Explicitly embed files (rarely needed, causes large Parquet files)
+        push_dataset_to_hub(ds, config, embed_external_files=True)
         ```
     """
-    ds.push_to_hub(config.hf_repo_id, **push_kwargs)
+    ds.push_to_hub(
+        config.hf_repo_id,
+        embed_external_files=embed_external_files,
+        **push_kwargs,
+    )

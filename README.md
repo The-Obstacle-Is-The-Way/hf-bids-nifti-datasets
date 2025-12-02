@@ -58,13 +58,34 @@ hf-bids-nifti-datasets/
 ├── tests/
 │   ├── test_core_nifti.py   # Core functionality tests
 │   └── test_cli_skeleton.py # CLI tests
+├── scripts/
+│   └── download_dataset.sh.example  # Example download script
+├── data/                    # Local BIDS data (gitignored)
 ├── pyproject.toml           # PEP 621 project config
 ├── uv.lock                  # Reproducible dependencies
 ├── Makefile                 # Dev workflow automation
+├── CITATION.cff             # Software citation metadata
 ├── .pre-commit-config.yaml  # Pre-commit hooks
-├── mypy.ini                 # Type checking config
 └── README.md
 ```
+
+### Data Directory Structure
+
+The `data/` directory (gitignored) is where you store downloaded BIDS datasets:
+
+```
+data/
+└── openneuro/
+    └── ds00XXXX/              # BIDS dataset ID
+        ├── dataset_description.json
+        ├── participants.tsv
+        ├── sub-001/
+        │   └── anat/
+        │       └── sub-001_T1w.nii.gz
+        └── ...
+```
+
+Use `scripts/download_dataset.sh.example` as a template for downloading from OpenNeuro.
 
 ## Usage
 
@@ -190,8 +211,40 @@ make pre-commit
 - [OpenNeuro](https://openneuro.org/)
 - [nibabel Documentation](https://nipy.org/nibabel/)
 
+## Citation
+
+<!-- TODO: Update this section when publishing your dataset -->
+
+If you use this software, please cite:
+
+```bibtex
+@software{hf_bids_nifti,
+  title = {hf-bids-nifti-datasets},
+  author = {TODO: Your Name},
+  year = {2024},
+  url = {https://github.com/The-Obstacle-Is-The-Way/hf-bids-nifti-datasets}
+}
+```
+
+If you use data from OpenNeuro, cite the original dataset:
+
+```bibtex
+@dataset{openneuro_dsXXXXXX,
+  title = {TODO: Original Dataset Title},
+  author = {TODO: Original Authors},
+  year = {XXXX},
+  publisher = {OpenNeuro},
+  doi = {TODO: Add DOI}
+}
+```
+
+See `CITATION.cff` for machine-readable citation metadata.
+
 ## License
 
-Apache-2.0
+Apache-2.0 (this software)
 
-The source datasets (ARC, SOOP) are released under CC0 (Public Domain) on OpenNeuro.
+**Source Data License:** The datasets available on OpenNeuro (e.g., ARC ds004884, SOOP ds004889) are released under **CC0 1.0 (Public Domain)**. This means:
+- You can freely copy, modify, and redistribute the data
+- No permission or attribution is legally required (though citation is encouraged)
+- See: https://creativecommons.org/publicdomain/zero/1.0/
